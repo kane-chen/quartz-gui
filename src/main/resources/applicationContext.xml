@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:osgi="http://www.springframework.org/schema/osgi" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+	<!-- SERVICE -->
+	<bean id="callService" class="cn.kane.service.CallServiceImpl"/>
+	<!-- JOB -->
+	<bean id="smsTaskJobTask"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject">
+			<ref local="callService" />
+		</property>
+		<property name="targetMethod">
+			<value>call</value>
+		</property>
+		<property name="concurrent" value="false" />
+	</bean>
+	<!--方式一：使用JobDetailBean，任务类必须实现Job接口 -->     
+    <bean id="job1" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">    
+	     <property name="name" value="jobimpl1name"/>    
+	     <property name="jobClass" value="cn.kane.jobs.TestJob1"/>   
+	     <property name="durability" value="true" />
+    </bean>   
+	<!-- TRIGGER -->
+	<!-- quartz-1.8以前的配置 <bean id="myJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean"> -->
+	<bean id="smsTaskTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail">
+			<ref bean="smsTaskJobTask" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/5 * * * ? *</value>
+		</property>
+	</bean>
+	<bean id="job1Trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail">
+			<ref bean="job1" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/5 * * * ? *</value>
+		</property>
+	</bean>
+
+	<!-- SCHEDULER -->
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="smsTaskTrigger" />
+				<ref local="job1Trigger" />
+			</list>
+		</property>
+		<property name="configLocation" value="classpath:quartz.properties" />
+	</bean>
+	
+<!-- http-jmx-view -->
+	<!-- mx4j support html-view -->
+	<bean id="xsltProcessor" class="mx4j.tools.adaptor.http.XSLTProcessor" />
+	<bean id="httpAdaptor" class="mx4j.tools.adaptor.http.HttpAdaptor" lazy-init="false" init-method="start">
+	    <property name="processor" ref="xsltProcessor" />
+	    <property name="port" value="9010" />
+	</bean> 
+	<!-- jdmk support html-view -->
+	<bean id="htmlAdapterJdmk" class="com.sun.jdmk.comm.HtmlAdaptorServer" lazy-init="false" init-method="start">
+    	<property name="port" value="9012" />
+	</bean>	
+<!-- MBeanServer -->
+	<bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+	    <property name="locateExistingServerIfPossible" value="true" />
+	</bean>
+	
+	<!-- MBeanExporter -->
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+	    <property name="beans">
+	        <map>
+				<!-- jdmk -->
+	            <entry key="server:name=HttpAdaptor" value-ref="httpAdaptor" />
+				<entry key="server:name=XSLTProcessor" value-ref="xsltProcessor" />
+				<!-- jdmk -->
+	            <entry key="server:name=HttpAdaptor" value-ref="htmlAdapterJdmk" />
+	        </map>
+	    </property>
+	    <property name="server" ref="mbeanServer" />
+	</bean> 
+
+</beans>

@@ -1,0 +1,49 @@
+JMX SUPPORT:
+1.QUARTZ
+  1.1 quartz.properties
+  	___________________________________________________________________________________________
+  	
+     # Must be set to true, otherwise the Quartz scheduler is not registered in the JMX server
+	 org.quartz.scheduler.jmx.export=true
+	 # JMX object name the Quartz scheduler is registered under in the JMX server.
+	 org.quartz.scheduler.jmx.objectName=quartz:type=QuartzScheduler,name=KaneScheduler
+    ___________________________________________________________________________________________
+    
+  1.2 SchedulerFactoryBean in applicationContext.xml
+    ___________________________________________________________________________________________
+  	
+     <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref local="smsTaskTrigger" />
+			</list>
+		</property>
+		<property name="configLocation" value="classpath:quartz.properties" />
+	</bean>
+	___________________________________________________________________________________________
+ 
+2. TOMCAT
+  2.1 (windows) {tomcat-home}/bin/setenv.bat
+    ___________________________________________________________________________________________
+    
+    set JMX_REMOTE_CONFIG=-Dcom.sun.management.jmxremote=true -Djava.rmi.server.hostname=localhost -Dcom.sun.management.jmxremote.port=9000 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false  
+	set CATALINA_OPTS=%CATALINA_OPTS% -Dquartzdesk.work.dir="D:\datas\quartzdesk" %JMX_REMOTE_CONFIG%  	
+	___________________________________________________________________________________________
+	
+  2.2 quarztDesk-agent(invariable)
+  	2.2.1 (windows) {tomcat-home}/bin/setenv.bat
+    ___________________________________________________________________________________________
+    
+    -javaagent:D:\ext_env\maven_repo\com\quartzdesk\quartzdesk-agent-api\1.5.0\quartzdesk-agent-1.5.0.jar 
+	-Dquartzdesk-agent.work.dir=D:\datas\quartzdesk\agent
+    ___________________________________________________________________________________________
+    
+    2.2.2 agent in pom
+    ___________________________________________________________________________________________
+    
+    <dependency>
+    		<groupId>com.quartzdesk</groupId>
+    		<artifactId>quartzdesk-api</artifactId>
+    		<version>1.5.0</version>
+    </dependency>
+    ___________________________________________________________________________________________
