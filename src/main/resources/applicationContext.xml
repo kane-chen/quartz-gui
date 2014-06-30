@@ -10,6 +10,15 @@
 		http://www.springframework.org/schema/context/spring-context-3.2.xsd
 		http://www.springframework.org/schema/tx 
 		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+	<context:property-placeholder location="classpath:jdbc.properties"/>  
+	<!-- data-source -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${quartz.driverClassName}" />
+		<property name="url" value="${quartz.url}" />
+		<property name="username" value="${quartz.username}" />
+		<property name="password" value="${quartz.password}" />
+	</bean>
 	<!-- SERVICE -->
 	<bean id="callService" class="cn.kane.service.CallServiceImpl"/>
 	<!-- JOB -->
@@ -56,6 +65,7 @@
 				<ref local="job1Trigger" />
 			</list>
 		</property>
+		<property name="dataSource" ref="quartzDataSource"/>
 		<property name="configLocation" value="classpath:quartz.properties" />
 	</bean>
 	
