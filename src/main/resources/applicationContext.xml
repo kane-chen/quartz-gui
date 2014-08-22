@@ -10,5 +10,12 @@
 		http://www.springframework.org/schema/context/spring-context-3.2.xsd
 		http://www.springframework.org/schema/tx 
 		http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+	
+	<bean id="schedulerFactory" class="cn.kane.quartz.QuartzSchedulerFactory" init-method="startup" destroy-method="shutdown">
+		<property name="quartzPropFileName" value="quartz.properties"/>
+		<property name="waitJobToComplete" value="true"/>
+		<property name="isPrintHeartBeat" value="true"/>
+		<property name="heartbeatMills" value="10000"/>
+	</bean>
 		
 </beans>
