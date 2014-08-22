@@ -14,7 +14,6 @@ public class TestJob1 extends QuartzJobBean {
 	protected void executeInternal(JobExecutionContext context)
 			throws JobExecutionException {
 		logger.info("JOB1-executeInternal");
-		
 	}
 
 }

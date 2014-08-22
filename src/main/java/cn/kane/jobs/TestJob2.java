@@ -15,7 +15,7 @@ public class TestJob2 extends QuartzJobBean{
 	protected void executeInternal(JobExecutionContext context)
 			throws JobExecutionException {
 		logger.info("TestJob2 executeInternal");
-		JobDataMap jobDataMap = context.getJobDetail().getJobDataMap() ;
+		JobDataMap jobDataMap = context.getMergedJobDataMap() ;
 		if(null!=jobDataMap){
 			logger.info("DESTPATH-"+jobDataMap.get("destPath"));
 			for(String key : jobDataMap.getKeys()){
