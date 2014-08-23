@@ -1,5 +1,7 @@
 package cn.kane.quartz;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.quartz.Scheduler;
@@ -9,6 +11,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.kane.tools.HttpClientUtils;
+
 public class QuartzSchedulerFactory {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(QuartzSchedulerFactory.class);
@@ -17,17 +21,25 @@ public class QuartzSchedulerFactory {
 	private boolean isPrintHeartBeat = false ;
 	/** heart-beat-period */
 	private long heartbeatMills = 5*60*1000L;
-	/** running-flag */
-	private AtomicBoolean isRunning = new AtomicBoolean(false) ;
 	/** wait running-job done when shutdown */
 	private boolean waitJobToComplete = true ;
-	
 	/** quartz-config-file */
 	private String quartzPropFileName = "quartz.properties" ;
+	
+	/** sync-url in quartz-man */
+	private String quartzManSyncUrl ;
+	/** jmx-host at local */
+	private String host ;
+	/** jmx-port at local */
+	private int port ;
+	
 	/** singleton */
 	private Scheduler schedulerInstance ;
+	
 	/** instance-lock */
 	private Object mutex = new Object();
+	/** running-flag */
+	private AtomicBoolean isRunning = new AtomicBoolean(false) ;
 	
 	/**
 	 * start up scheduler,ready to service
@@ -50,7 +62,10 @@ public class QuartzSchedulerFactory {
 							schedulerInstance.start();
 							isRunning.set(true);
 							LOGGER.info("Scheduler started with[propFileName={}]",quartzPropFileName);
+							//heart-beat
 							this.startHeartbeatThread();
+							//scheduler-sync
+							this.syncJobsWhenRestart();
 						}
 					} catch (SchedulerException e) {
 						LOGGER.error("QuartzSchedulerFactory startUp error",e);
@@ -59,6 +74,18 @@ public class QuartzSchedulerFactory {
 			}
 		}else{
 			LOGGER.warn("quartz-scheduler start already");
+		}
+	}
+	
+	private void syncJobsWhenRestart(){
+		Map<String,String> params = new HashMap<String,String>() ;
+		params.put("host", host) ;
+		params.put("port", port+"") ;
+		try {
+			String resp = HttpClientUtils.call(quartzManSyncUrl, params);
+			LOGGER.info("SYNC-RESP:"+resp);
+		} catch (Exception e) {
+			LOGGER.warn("SCHEDULER-SYNC ERROR",e);
 		}
 	}
 	
@@ -146,6 +173,30 @@ public class QuartzSchedulerFactory {
 
 	public void setHeartbeatMills(long heartbeatMills) {
 		this.heartbeatMills = heartbeatMills;
+	}
+
+	public String getQuartzManSyncUrl() {
+		return quartzManSyncUrl;
+	}
+
+	public void setQuartzManSyncUrl(String quartzManSyncUrl) {
+		this.quartzManSyncUrl = quartzManSyncUrl;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	public void setHost(String host) {
+		this.host = host;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
 	}
 	
 }
