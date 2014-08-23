@@ -35,8 +35,10 @@ public class HttpClientUtils {
 		CloseableHttpClient httpClient = HttpClientBuilder.create().build() ;
 		//params
 		List<NameValuePair> paramPairs = new ArrayList<NameValuePair>() ;
-		for(String key : params.keySet()){
-			paramPairs.add(new BasicNameValuePair(key, params.get(key))) ;
+		if(null!=params){
+			for(String key : params.keySet()){
+				paramPairs.add(new BasicNameValuePair(key, params.get(key))) ;
+			}
 		}
 		//execute
         try {

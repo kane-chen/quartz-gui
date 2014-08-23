@@ -16,7 +16,7 @@
 	<context:property-placeholder location="classpath:quartz.properties"/>  
 	
 	<!-- utils -->
-	<bean class="cn.kane.quartz.SpringAppContextUtils"/>
+	<bean class="cn.kane.tools.SpringAppContextUtils"/>
 	<!-- scheduler-factory -->
 	<bean id="schedulerFactory" class="cn.kane.quartz.QuartzSchedulerFactory" init-method="startup" destroy-method="shutdown">
 		<property name="quartzPropFileName" value="quartz.properties"/>

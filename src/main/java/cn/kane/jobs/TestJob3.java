@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
-import cn.kane.quartz.SpringAppContextUtils;
+import cn.kane.tools.SpringAppContextUtils;
 import cn.kane.service.scan.IDemo4ScanService;
 
 public class TestJob3 extends QuartzJobBean{

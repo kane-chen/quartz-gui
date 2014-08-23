@@ -1,4 +1,4 @@
-package cn.kane.quartz;
+package cn.kane.tools;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
